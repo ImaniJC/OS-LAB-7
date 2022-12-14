@@ -5,6 +5,8 @@
 #include "list.h"
 #include "util.h"
 
+//recieved help from Doron
+
 void TOUPPER(char * arr){
   
     for(int i=0;i<strlen(arr);i++){
