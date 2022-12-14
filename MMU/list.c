@@ -1,5 +1,5 @@
 // list/list.c
-// received help from Chad and Yasmin
+// received help from Doron
 // Implementation for linked list.
 
 #include <stdio.h>
