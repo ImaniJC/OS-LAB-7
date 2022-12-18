@@ -1,7 +1,4 @@
-// list/list.c
-// received help from Doron
-// Implementation for linked list.
-
+// received help from Asaad
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +12,7 @@ list_t *list_alloc() {
 }
 
 node_t *node_alloc(block_t *blk) {   
-  node_t* node = malloc(sizeof(node_t));
+	node_t* node = malloc(sizeof(node_t));
   node->next = NULL;
   node->blk = blk;
   return node; 
@@ -49,7 +46,7 @@ int list_length(list_t *l) {
   node_t *current = l->head;
   int i = 0;
   while (current != NULL){
-    i++;
+  	i++;
     current = current->next;
   }
   
@@ -99,120 +96,88 @@ void list_add_at_index(list_t *l, block_t *blk, int index){
 }
 
 void list_add_ascending_by_address(list_t *l, block_t *newblk){
-  
+  node_t *curr;
+  node_t *prev;
+  node_t *ascendnode = node_alloc(newblk);
    /*
    * 1. Insert newblk into list l in ascending order based on the START address of the block.
-   * 
    *    node_t *c = l.head;
    *    Insert newblk After Current Node if:   newblk->start > c->start
    */
-   node_t *curr;
-   node_t *prev;
-   node_t *newNode = node_alloc(newblk);
-
-   if(l->head == NULL){
-     l->head = newNode;
-   }
-   else{
-     prev = curr = l->head;
-
-     if (curr->next == NULL){
-       if (newblk->start <= curr->blk->start){
-         newNode->next = l->head;
-         l->head = newNode;
-       }
-       else{
-         curr->next = newNode;
-         newNode->next = NULL;
-       }
-     }
-
-     else{
-
-       if (newNode->blk->start <= curr->blk->start){
-         newNode->next = l->head;
-         l->head = newNode;
-       }
-       else{
-         while(curr != NULL && newNode->blk->start >= curr->blk->start){
-           prev = curr;
-           curr = curr->next;
-         }
-         prev->next = newNode;
-         newNode->next = curr;
-       }
-     }
-   }
-
-
-
-
-}
-
-void list_add_ascending_by_blocksize(list_t *l, block_t *newblk){
-   /*
-   * 1. Insert newblk into list l in ascending order based on the blocksize.
-   *    blocksize is calculated :  blocksize = end - start +1
-   * 
-   *    Ex:  blocksize = newblk->end - newblk->start
-   * 
-   *         node_t *c = l.head;
-   * 
-   *         curr_blocksize = c->blk->end - c->blk->start +1;
-   * 
-   *         Insert newblk After Current Node if:   blocksize >= curr_blocksize
-   * 
-   *    USE the compareSize()
-   */
-   node_t *curr;
-   node_t *prev;
-   node_t *newNode = newNode->blk->end - newNode->blk->start;
-   int newblk_size = newNode->blk->end - newNode->blk->start;
-   int curblk_size;
-
-   if(l->head == NULL){
-      l->head = newNode;
-    }
-    else{
-      prev = curr = l->head;
-      
-      curblk_size = curr->blk->end - curr->blk->start + 1;
-      
-      if(curr->next == NULL){  
-        if(newblk_size <= curblk_size){ 
-            newNode->next = l->head;
-            l->head = newNode;
+	if(l->head == NULL){ l->head = ascendnode; }
+		else{
+    	prev = curr = l->head;
+      if(curr->next == NULL) {  
+        if(newblk->start <= curr->blk->start) {  
+          ascendnode->next = l->head;
+          l->head = ascendnode;
         }
         else { 
-          curr->next = newNode;
-          newNode->next = NULL;
+          curr->next = ascendnode;
+          ascendnode->next = NULL;
         }
       }
       else {
-        
-        if(newblk_size <= curblk_size){
-          newNode->next = l->head;
-          l->head = newNode;
+        if(ascendnode->blk->start <= curr->blk->start) {  
+          ascendnode->next = l->head;
+          l->head = ascendnode;
         }
-        else{
-          while(curr != NULL && newblk_size >= curblk_size) {
+        else {
+          while(curr != NULL && ascendnode->blk->start >= curr->blk->start) {
             prev = curr;
-            curr = curr->next;
-
-            if(curr != NULL){
-              curblk_size = curr->blk->end - curr->blk->start;
-            }
+            curr = curr->next;    
           }
-          prev->next = newNode;
-          newNode->next = curr;
+            prev->next = ascendnode;
+            ascendnode->next = curr;
+        }
+      }
+  	}
+}
+
+void list_add_ascending_by_blocksize(list_t *l, block_t *newblk){
+  
+  node_t *current;
+  node_t *prev;
+  node_t *newNode = node_alloc(newblk);
+  int newblk_size = newblk->end - newblk->start;
+  int curblk_size;
+  
+  if(l->head == NULL){
+    l->head = newNode;
+  }
+  else{
+    prev = current = l->head;
+    
+    curblk_size = current->blk->end - current->blk->start + 1;
+    
+    if(current->next == NULL) {  
+      if(newblk_size >= curblk_size) {  
+        newNode->next = l->head;
+        l->head = newNode;
+      }
+      else {   
+        current->next = newNode;
+        newNode->next = NULL;
       }
     }
-
-
-
-
-
-
+    else {  
+      if(newblk_size >= curblk_size) {  
+				newNode->next = l->head;
+				l->head = newNode;
+			}
+      else {
+				while(current != NULL && newblk_size <= curblk_size) {
+					prev = current;
+					current = current->next;
+					if(current != NULL)  
+						curblk_size = current->blk->end - current->blk->start;
+          }
+        prev->next = newNode;
+        newNode->next = current;
+       }
+    }
+  }
+   
 }
 
 void list_add_descending_by_blocksize(list_t *l, block_t *blk){
@@ -231,71 +196,59 @@ void list_add_descending_by_blocksize(list_t *l, block_t *blk){
     curblk_size = current->blk->end - current->blk->start + 1;
     
     if(current->next == NULL) {  //only one node in list
-       if(newblk_size >= curblk_size) {  // place in front of current node
-          newNode->next = l->head;
-          l->head = newNode;
-       }
-       else {   // place behind current node
-          current->next = newNode;
-          newNode->next = NULL;
-       }
+      if(newblk_size >= curblk_size) {  // place in front of current node
+        newNode->next = l->head;
+        l->head = newNode;
+      }
+      else {   // place behind current node
+        current->next = newNode;
+        newNode->next = NULL;
+      }
     }
     else {  // two or more nodes in list
       
-       if(newblk_size >= curblk_size) {  // place in front of current node
-          newNode->next = l->head;
-          l->head = newNode;
-       }
-       else {
+      if(newblk_size >= curblk_size) {  // place in front of current node
+        newNode->next = l->head;
+        l->head = newNode;
+      }
+      else {
       
-          while(current != NULL && newblk_size <= curblk_size) {
-               prev = current;
-               current = current->next;
+        while(current != NULL && newblk_size <= curblk_size) {
+          prev = current;
+          current = current->next;
                
-               if(current != NULL)  // the last one in the list
-                     curblk_size = current->blk->end - current->blk->start;
+          if(current != NULL)  // the last one in the list
+            curblk_size = current->blk->end - current->blk->start;
           }
-          prev->next = newNode;
-          newNode->next = current;
-       }
+        prev->next = newNode;
+        newNode->next = current;
+      }
     }
   }
 }
 
-void list_coalese_nodes(list_t *l){ 
-  /*
-   * 1. Assuming you have passed in a sorted list of blocks based on addresses in ascending order
-   * 2. While list is not empty,
-   *    a. compare two nodes at a time to see if the prev.END + 1 == current.START, if so, they are physically adjacent
-   *    combine them by setting the prev.END = current.END. 
-   *    b. If not adjacent go to #6
-   * 3. point the prev.NEXT to the current.NEXT to skip over current.
-   * 4. Free current
-   * 5. go back to #2
-   * 6. Advance prev = current, and current = current.NEXT
-   * 7. go back to #2
-   * 
-   * USE the compareSize()
-   */
+void list_coalese_nodes(list_t *l){  
+   // 1. Assuming you have passed in a sorted list of blocks based on addresses in ascending order
+    
+   // USE the compareSize()
+  if (!l->head || !l->head->next){ return; }
+  node_t *prev = l->head;
+  node_t *curr = l->head->next;
 
-   if (l->head == NULL || l->head->next == NULL){
-     return;
-   }
-
-   node_t* prev = l->head;
-   node_t* curr = l->head->next;
-
-   while(curr != NULL){
-     if ((prev->blk->end + 1) == curr->blk->start){
-       prev->blk->end = curr->blk->end;
-       prev->next = curr->next;
-       node_free(curr);
-       curr = prev->next;
-     } else {
-       prev = curr;
-       curr = curr->next;
-     }
-   }
+  while(curr){ // 2. While list is not empty,
+    if (prev->blk->end + 1 == curr->blk->start){ //    a. compare two nodes at a time to see if the prev.END + 1 == current.START, if so, they are physically adjacent
+      prev->blk->end = curr->blk->end; //    combine them by setting the prev.END = current.END.
+      prev->next = curr->next; // 3. point the prev.NEXT to the current.NEXT to skip over current.
+      free(curr); // 4. Free current
+      curr = prev->next;
+      // 5. go back to #2
+    }
+    else{ //    b. If not adjacent go to #6
+      prev = curr; // 6. Advance prev = current, and current = current.NEXT
+      curr = curr->next;
+      // 7. go back to #2
+    }
+  }
 }
 
 block_t* list_remove_from_back(list_t *l){
@@ -304,18 +257,18 @@ block_t* list_remove_from_back(list_t *l){
 
   if(l->head != NULL){
     
-    if(current->next == NULL) { // one node
-         l->head->next = NULL;
-         value = current->blk;
-         node_free(current);
+    if(current->next == NULL) { 
+      l->head->next = NULL;
+      value = current->blk;
+      node_free(current);
     }
     else {
-         while (current->next->next != NULL){
-            current = current->next;
-         }
-         value = current->blk;
-         node_free(current->next);
-         current->next = NULL;
+      while (current->next->next != NULL){
+        current = current->next;
+        }
+      value = current->blk;
+      node_free(current->next);
+      current->next = NULL;
     }
   }
   return value;
@@ -387,7 +340,7 @@ block_t* list_remove_at_index(list_t *l, int index) {
 bool compareBlks(block_t* a, block_t *b) {
   
   if(a->pid == b->pid && a->start == b->start && a->end == b->end)
-     return true;
+    return true;
   
   return false;
 }
@@ -395,7 +348,7 @@ bool compareBlks(block_t* a, block_t *b) {
 bool compareSize(int a, block_t *b) {  // greater or equal
   
   if(a <= (b->end - b->start) + 1)
-     return true;
+    return true;
   
   return false;
 }
@@ -403,7 +356,7 @@ bool compareSize(int a, block_t *b) {  // greater or equal
 bool comparePid(int a, block_t *b) {
   
   if(a == b->pid)
-     return true;
+    return true;
   
   return false;
 }
@@ -413,7 +366,7 @@ bool list_is_in(list_t *l, block_t* value) {
   node_t *current = l->head;
   while(current != NULL){
     if(compareBlks(value, current->blk)){
-      return true;
+    	return true;
     }
     current = current->next;
   }
@@ -435,10 +388,10 @@ block_t* list_get_elem_at(list_t *l, int index) {
     i = 0;
     while(current != NULL){
       if(i == index)
-          return(current->blk);
+        return(current->blk);
       else {
-         current = current->next;
-         i++;
+        current = current->next;
+        i++;
       }
     }
   }
@@ -454,7 +407,7 @@ int list_get_index_of(list_t *l, block_t* value){
   
   while (current != NULL){
    if (compareBlks(value,current->blk)){
-     return i;
+    	return i;
     }
     current = current->next;
     i++;
@@ -475,37 +428,29 @@ return false;
 }
 
 /* Checks to see if pid of block exists in the list. */
-bool list_is_in_by_pid(list_t *l, int pid){ 
-  
-  /* Iterate through the list to find a node with a blk that has blk->pid = pid
-   * 
-   * USE the comparePID()
-   * 
-   * Look at list_is_in_by_size()
-   * */
-
-   node_t* curr = l->head;
-   while(curr != NULL){
-     if(comparePid(pid, curr->blk)){
-       return true;
+bool list_is_in_by_pid(list_t *l, int pid){   
+   // Look at list_is_in_by_size()
+  node_t *current = l->head;
+    while(current != NULL){ // Iterate through the list to find a node with a blk that has blk->pid = pid
+      if(comparePid(pid, current->blk)){ // USE the comparePID()
+        return true;
      }
-
-     curr = curr->next;
+    current = current->next;
    }
-   return false;
+return false;
 }
 
 /* Returns the index at which the given block of Size or greater appears. */
 int list_get_index_of_by_Size(list_t *l, int Size){
- int i = 0;
- node_t *current = l->head;
+int i = 0;
+node_t *current = l->head;
  if(l->head == NULL){
     return -1;
   }
   
   while (current != NULL){
-   if (compareSize(Size,current->blk)){
-     return i;
+  	if (compareSize(Size,current->blk)){
+    	return i;
     }
     current = current->next;
     i++;
@@ -516,15 +461,15 @@ int list_get_index_of_by_Size(list_t *l, int Size){
                    
 /* Returns the index at which the pid appears. */
 int list_get_index_of_by_Pid(list_t *l, int pid){
- int i = 0;
- node_t *current = l->head;
- if(l->head == NULL){
-    return -1;
+	int i = 0;
+	node_t *current = l->head;
+	if(l->head == NULL){
+  	return -1;
   }
   
   while (current != NULL){
-   if (comparePid(pid,current->blk)){
-     return i;
+  	if (comparePid(pid,current->blk)){
+    	return i;
     }
     current = current->next;
     i++;
@@ -532,3 +477,4 @@ int list_get_index_of_by_Pid(list_t *l, int pid){
 
   return -1; 
 }
+
